@@ -1,59 +1,60 @@
 'use strict';
 
-const offset = -15;
-let mywords, myFont, dashOffset, advance, bgColor, placeholder;
+let roboMono;
 
 // Util
-const myText = y => {
-    push();
-    translate(width / 2, height / 2);
-    rotate(map(mouseX, 0, width, 0, 2 * PI));
-    translate(0, -height / 2);
-    // Bottom text
-    push();
-    fill(0, 0, 255, 20);
-    text(placeholder, offset, y + offset);
-    pop();
-    // Top text
-    fill(255);
-    stroke(0);
-    strokeWeight(10);
-    drawingContext.setLineDash([200, 100, 50]);
-    drawingContext.lineDashOffset = dashOffset + y * 2;
-    text(placeholder, random(-5, 5), y);
-    pop();
-};
-
-const ranColor = () => [0, 0, random(0, 1) * 255, 255 / 2];
-const ranWord = arr => random(arr);
+let letteroff;
+const abc = 'abcdefghijklmnopqrstuvwxyz',
+    myChar = (x, y, deg, cletter, str) => {
+        push();
+        textSize(25);
+        translate(x, y);
+        rotate(deg + frameCount);
+        shearX(Math.sin(frameCount));
+        fill(255);
+        text(str[cletter], 0, 0);
+        pop();
+    };
 
 // Drawbot
 function preload() {
-    myFont = loadFont('./RobotoMono-VariableFont_wght.ttf');
-    mywords = loadStrings('poetry.txt');
+    roboMono = loadFont('./RobotoMono-VariableFont_wght.ttf');
 }
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    textSize(300);
-    textAlign(CENTER, CENTER);
-    textFont(myFont); // Sets the whole sketch font
-    frameRate(10);
-    bgColor = ranColor();
-    dashOffset = 0;
-    advance = 0;
-    placeholder = ranWord(mywords).toUpperCase();
+    textFont(roboMono);
+    angleMode(DEGREES);
+    frameRate(36);
+    textAlign(CENTER);
+    letteroff = 0;
+}
+
+function windowResized() {
+    createCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
-    background(bgColor);
+    background('#0002');
     // Text
-    for (let rep = 0; rep + mouseY < height * 0.75; rep += 10) myText(80 + rep);
-    // Offset increase
-    dashOffset += 20;
-}
-
-function mouseClicked() {
-    bgColor = ranColor();
-    placeholder = ranWord(mywords).toUpperCase();
+    if (frameCount % 16 == 0) {
+        letteroff++;
+    }
+    let lncounter = 0;
+    for (let y = height * 0.1; y < height * 0.9; y += height * 0.05) {
+        for (let i = 0; i < abc.length; i++) {
+            myChar(
+                map(i, 0, abc.length, width * 0.1, width * 0.9),
+                y +
+                    Math.sin((frameCount / 2 + i) / 4) * 10 +
+                    Math.cos((y + i) / 4) * 10,
+                map(i * lncounter, 0, abc.length * 16, 0, 360),
+                lncounter % 2 === 0
+                    ? (i + letteroff) % abc.length
+                    : (letteroff % abc.length) - i,
+                abc
+            );
+        }
+        lncounter++;
+    }
 }
